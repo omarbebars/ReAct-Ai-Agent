@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-from datetime import datetime
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -9,10 +8,7 @@ load_dotenv()
 # Import agent components
 from langchain_classic.agents import AgentExecutor, create_react_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_community.tools import DuckDuckGoSearchRun
-from langchain_community.utilities import WikipediaAPIWrapper
-from langchain_core.tools import Tool
-from langchain_core.prompts import PromptTemplate
+from tools import get_tools, get_prompt
 
 # --- Page Config ---
 st.set_page_config(
@@ -48,69 +44,8 @@ if "agent_executor" not in st.session_state:
         api_key=os.getenv("Gemini_API_KEY")
     )
 
-    # Custom Tools
-    def save_to_txt(data: str):
-        """Saves research to local file."""
-        filename = "research_output.txt"
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        formatted_text = f"--- Research Output ---\nTimestamp: {timestamp}\n\n{data}\n\n"
-        try:
-            with open(filename, "a", encoding="utf-8") as f:
-                f.write(formatted_text)
-            return f"✅ Saved to {filename}"
-        except Exception as e:
-            return f"❌ Error: {e}"
-
-    # Initialize Tools
-    search = DuckDuckGoSearchRun(doc_content_chars_max=100)
-    wikipedia = WikipediaAPIWrapper(doc_content_chars_max=100)
-
-    tools = [
-        Tool(
-            name="Search",
-            func=search.run,
-            description="Useful for answering questions about current events"
-        ),
-        Tool(
-            name="Wikipedia",
-            func=wikipedia.run,
-            description="Useful for factual questions about history, science, etc."
-        ),
-        Tool(
-            name="SaveToFile",
-            func=save_to_txt,
-            description="Useful for saving research, findings, or summaries to a local text file"
-        )
-    ]
-
-    # Prompt Template
-    template = '''Answer the following questions as best you can. You have access to the following tools:
-
-{tools}
-
-Use the following format:
-
-Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer. I will save this to a file.
-Action: SaveToFile
-Action Input: [provide a clear summary of your findings]
-Observation: [confirmation from SaveToFile]
-Final Answer: the final answer to the original input question
-
-Begin!
-
-Previous conversation:
-{chat_history}
-
-Question: {input}
-Thought:{agent_scratchpad}'''
-
-    prompt = PromptTemplate.from_template(template)
+    tools = get_tools()
+    prompt = get_prompt()
 
     # Create Agent
     agent = create_react_agent(llm, tools, prompt)

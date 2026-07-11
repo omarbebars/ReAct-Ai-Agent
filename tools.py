@@ -3,6 +3,7 @@ from datetime import datetime
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_core.tools import Tool
+from langchain_core.prompts import PromptTemplate
 
 # --- 1. Custom Tool: SAVE to File ---
 def save_to_txt(data: str):
@@ -42,3 +43,33 @@ def get_tools():
             description="Useful for when you want to save the final answer, research, or summary to a local text file."
         )
     ]
+
+# --- 5. Shared ReAct Prompt Template ---
+REACT_PROMPT_TEMPLATE = '''Answer the following questions as best you can. You have access to the following tools:
+
+{tools}
+
+Use the following format:
+
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer. I will save this to a file.
+Action: SaveToFile
+Action Input: [provide a clear summary of your findings]
+Observation: [confirmation from SaveToFile]
+Final Answer: the final answer to the original input question
+
+Begin!
+
+Previous conversation:
+{chat_history}
+
+Question: {input}
+Thought:{agent_scratchpad}'''
+
+def get_prompt():
+    return PromptTemplate.from_template(REACT_PROMPT_TEMPLATE)
