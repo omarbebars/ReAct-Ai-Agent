@@ -1,4 +1,4 @@
-# Gemini ReAct Research Agent
+# ReAct Research Agent
 
 An autonomous AI agent capable of conducting web research, scraping Wikipedia, and saving structured summaries to local storage. Built with **Python**, **LangChain**, and **Google's Gemini**, with SQLite-backed conversation memory that survives restarts.
 
