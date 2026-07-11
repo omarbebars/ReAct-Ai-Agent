@@ -50,3 +50,11 @@ htmlcov/
 
 # Output files
 research_output.txt
+chat_history.db
+optimized_prompt.txt
+
+# deepeval local cache/telemetry
+.deepeval/
+
+# Personal notes
+NOTES.md
