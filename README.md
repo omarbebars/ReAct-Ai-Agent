@@ -40,7 +40,7 @@ flowchart TD
 
 Every turn re-fills the same 5 placeholders from `tools.py`, loops Thought → Action → Observation until `Final Answer:`. `AgentExecutor(memory=...)` auto-loads `{chat_history}` before the run and auto-persists the exchange to `chat_history.db` after — no manual buffer building, and the conversation survives quitting the process or reloading the Streamlit app.
 
-### Offline (`optimize_agent.py`) — manual only, never runs automatically
+### (`optimize_agent.py`) 
 
 ```mermaid
 flowchart TD
