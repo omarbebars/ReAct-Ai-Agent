@@ -1,4 +1,4 @@
-# Gemini ReAct Research Agent
+# ReAct Research Agent
 
 An autonomous AI agent capable of conducting web research, scraping Wikipedia, and saving structured summaries to local storage. Built with **Python**, **LangChain**, and **Google's Gemini**, with SQLite-backed conversation memory that survives restarts.
 
@@ -40,7 +40,7 @@ flowchart TD
 
 Every turn re-fills the same 5 placeholders from `tools.py`, loops Thought → Action → Observation until `Final Answer:`. `AgentExecutor(memory=...)` auto-loads `{chat_history}` before the run and auto-persists the exchange to `chat_history.db` after — no manual buffer building, and the conversation survives quitting the process or reloading the Streamlit app.
 
-### Offline (`optimize_agent.py`) — manual only, never runs automatically
+### (`optimize_agent.py`) 
 
 ```mermaid
 flowchart TD
@@ -256,18 +256,6 @@ pip install ddgs
 - The agent uses `gemini-flash-latest` which has built-in rate limiting
 - Add delays between queries or reduce request frequency
 
-## Future Improvements
-
-Ideas for scaling this beyond a single-user hobby agent, roughly in order of leverage-to-effort:
-
-- **Native tool-calling** – Replace the text-based ReAct `Action:`/`Action Input:` parsing with Gemini's native function calling (`create_tool_calling_agent`). More reliable than parsing free-text output and avoids `handle_parsing_errors` silently swallowing real failures.
-- **Observability** – Add tracing (e.g. LangSmith or LangFuse) to see latency, cost, and failure reasons per run instead of flying blind as usage grows.
-- **Multi-user memory (Postgres)** – `get_memory()` in `tools.py` already swaps cleanly to any SQL backend `SQLChatMessageHistory` supports; move off local SQLite to Postgres if this needs concurrent, multi-user sessions rather than a single local file.
-- **Async backend (FastAPI)** – Needed only if this agent should serve concurrent users or be called from other services, rather than run locally by one person.
-- **RAG / vector DB** – Add a vector store (e.g. Chroma, pgvector) if the agent needs to answer from a private knowledge base rather than just the public web/Wikipedia.
-- **Eval/regression harness** – A small golden-set of questions with expected-answer checks (DeepEval or a DIY script), run after prompt/tool changes to catch regressions.
-
-None of these are implemented yet — each is a real complexity/dependency tradeoff, only worth it once there's an actual need (multi-user traffic, a private knowledge base, observed quality issues) rather than speculatively.
 
 ## License
 
