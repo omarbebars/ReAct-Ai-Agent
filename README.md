@@ -203,7 +203,7 @@ python optimize_agent.py
   - `tool_routing_metric` — did the agent pick the right tool (Wikipedia vs. Search vs. SaveToFile)?
   - `reasoning_depth_metric` — did multi-part queries get multiple distinct tool calls, and did the agent avoid looping?
   - `factual_grounding_metric` — does the agent search for current/recent info instead of hallucinating or refusing on the grounds the year is "in the future"?
-- **Grading** (all `GEval` metrics) uses Gemini via deepeval's `GeminiModel`. **Reflection and mutation** (GEPA proposing and rewriting candidate prompts) use `OpenRouterModel` on a free-tier model (`meta-llama/llama-3.3-70b-instruct:free` by default, override via `OPENROUTER_MODEL_NAME`) — no OpenAI key required anywhere in the pipeline.
+- **Grading** (all `GEval` metrics) uses Gemini via deepeval's `GeminiModel`. **Reflection and mutation** (GEPA proposing and rewriting candidate prompts) use `OpenRouterModel` on a free-tier model (`openai/gpt-oss-20b:free` by default, override via `OPENROUTER_MODEL_NAME`) — no OpenAI key required anywhere in the pipeline.
 - Any candidate prompt missing a required placeholder (`{tools}`, `{tool_names}`, `{chat_history}`, `{input}`, `{agent_scratchpad}`) is rejected before it can break `create_react_agent()`.
 - On success, writes the best candidate to `optimized_prompt.txt` for manual review before copying it into `tools.py`.
 - A full run (30 goldens × up to 7 GEPA iterations, each doing real Gemini/DuckDuckGo/Wikipedia calls) takes a while and makes many API calls — consider lowering `iterations`/`minibatch_size` in `optimize_agent.py` for a quick sanity check first.
