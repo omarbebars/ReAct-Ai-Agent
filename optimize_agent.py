@@ -5,8 +5,7 @@ reflect-and-mutate loop.
 
 Runs the existing LangChain agent (tools.py's get_tools()/REACT_PROMPT_TEMPLATE)
 against a 30-golden dataset spanning 10 known ReAct failure categories. Grading
-uses Gemini (compliance metric); reflection/mutation use OpenRouter's free tier
-so no OpenAI key is needed.
+uses Gemini (compliance metric); reflection/mutation use OpenRouter
 
 This is an OFFLINE script: it never touches tools.py. It writes the best
 candidate prompt to optimized_prompt.txt for human review.
@@ -38,14 +37,10 @@ REQUIRED_PLACEHOLDERS = ["{tools}", "{tool_names}", "{chat_history}", "{input}",
 
 GEMINI_API_KEY = os.getenv("Gemini_API_KEY")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-# Free-tier OpenRouter reasoning model for GEPA's reflection/mutation steps (no OpenAI key
-# needed). gpt-oss-20b:free supports OpenRouter's "reasoning" param, which gives GEPA's
+# Free-tier OpenRouter reasoning model for GEPA's reflection/mutation steps. gpt-oss-20b:free supports OpenRouter's "reasoning" param, which gives GEPA's
 # reflection step an explicit chain-of-thought over *why* a candidate prompt failed before
 # it proposes a mutation -- should yield sharper rewrites than a non-reasoning model.
 OPENROUTER_MODEL_NAME = os.getenv("OPENROUTER_MODEL_NAME", "openai/gpt-oss-20b:free")
-# "reasoning" isn't a real OpenAI chat-completions param, so it must go through
-# extra_body (the openai SDK's escape hatch for provider-specific fields) rather
-# than as a top-level generation_kwargs entry, or create() raises a TypeError.
 OPENROUTER_REASONING_KWARGS = {"extra_body": {"reasoning": {"enabled": True}}}
 
 AGENT_LLM = ChatGoogleGenerativeAI(model="gemini-flash-latest", temperature=0, api_key=GEMINI_API_KEY)
@@ -78,7 +73,7 @@ GOLDENS = [
 
     # --- CATEGORY 2: Missing State / File Persistence ---
     Golden(
-        input="Research the exact camera specifications of the iPhone 15 Pro Max and save the results to a file.",
+        input="Research the exact camera specifications of the iPhone 17 Pro Max and save the results to a file.",
         expected_output="The agent must first use Web Search or Wikipedia, and then explicitly call the SaveToFile tool before providing the Final Answer.",
     ),
     Golden(
@@ -100,7 +95,7 @@ GOLDENS = [
         expected_output="The agent must execute separate tool actions to look up both distinct individuals before making the mathematical comparison.",
     ),
     Golden(
-        input="Compare the academic entry requirements of HTW Berlin versus TU Berlin for Computer Engineering.",
+        input="Compare the academic entry requirements of HTW Berlin versus TU Berlin for Software Engineering.",
         expected_output="The agent must perform a search or lookup for HTW Berlin and a separate search for TU Berlin before synthesizing the final output.",
     ),
 
@@ -120,7 +115,7 @@ GOLDENS = [
 
     # --- CATEGORY 5: Tool Misallocation / Lazy Selection ---
     Golden(
-        input="What is the exact founding date and history of Mercedes-Benz Tech Innovation according to Wikipedia?",
+        input="What is the exact founding date and history of BMW according to Wikipedia?",
         expected_output="The agent must strictly select the Wikipedia tool, not the standard web search tool.",
     ),
     Golden(
@@ -134,7 +129,7 @@ GOLDENS = [
 
     # --- CATEGORY 6: Graceful Error Handling & Fallbacks ---
     Golden(
-        input="Search Wikipedia for 'Jochum Medizintechnik GmbH' and summarize what you find.",
+        input="Search Wikipedia for 'Medizintechnik' and summarize what you find.",
         expected_output="If the Wikipedia tool returns no results, the agent must observe the failure and gracefully pivot to the Web Search tool instead of crashing or giving up.",
     ),
     Golden(
@@ -313,8 +308,8 @@ def main():
     # mutation_model above) builds the internal Scorer/Rewriter eagerly at
     # construction time, defaulting to OpenAI's GPTModel if left unset -- which
     # crashes without OPENAI_API_KEY before GEPA.execute() ever runs and gets a
-    # chance to override them with reflection_model/mutation_model. Pass our
-    # OpenRouter model explicitly so no OpenAI key is required anywhere.
+    # chance to override them with reflection_model/mutation_model. Pass
+    # OpenRouter model 
     optimizer = PromptOptimizer(
         algorithm=gepa, metrics=METRICS, model_callback=model_callback, optimizer_model=REFLECTION_MODEL,
     )
